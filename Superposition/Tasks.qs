@@ -169,7 +169,19 @@ namespace Quantum.Kata.Superposition {
     // Example: for N = 2 and isEven = true the required state is (|00⟩ + |10⟩) / sqrt(2), 
     //      and for N = 2 and isEven = false the required state is (|01⟩ + |11⟩) / sqrt(2).
     operation EvenOddNumbersSuperposition (qs : Qubit[], isEven : Bool) : Unit {
-        // ...
+        
+		mutable length = Length(qs);
+		//Make all but the last one 50/50
+		for (i in 0..length-2)
+		{
+			H(qs[i]);
+		}
+
+		//If even, keep the last one |0>, otherwise flip it to |1>
+		if (not isEven)
+		{
+			X(qs[length-1]);
+		}
     }
 
 
@@ -177,7 +189,16 @@ namespace Quantum.Kata.Superposition {
     // Input: 2 qubits in |00⟩ state.
     // Goal: create the state (|00⟩ + |01⟩ + |10⟩) / sqrt(3) on these qubits.
     operation ThreeStates_TwoQubits (qs : Qubit[]) : Unit {
-        // ...
+		//Rotate first qubit to have distributed probability
+		// P(0) = 2/3, P(1) = 1/3
+		let theta = ArcCos(Sqrt(2.0) / Sqrt(3.0));
+		Ry(2.0 * theta, qs[0]);
+        
+		//If q[0] == |0>
+		//	 q[1] = |+> (50/50 chance)
+		// else
+		//   q[1] = |0>
+		(ControlledOnInt(0, H))([qs[0]], qs[1]);
     }
 
 
@@ -185,7 +206,23 @@ namespace Quantum.Kata.Superposition {
     // Input: 2 qubits in |00⟩ state
     // Goal: create the state (3|00⟩ + |01⟩ + |10⟩ + |11⟩) / sqrt(12) on these qubits.
     operation Hardy_State (qs : Qubit[]) : Unit {
-        // ...
+		//Note that P(00) is not 3/6, but rather 9/12, as we square that portion and denominator to get the answer
+		//P(00) = 0.75
+		//P(01) = .083
+		//P(10) = .083
+		//P(11) = .083
+
+		//P(0) = 0.75 + 0.083
+		let theta0 = ArcCos(Sqrt(10.0 / 12.0));
+		Ry(2.0 * theta0, qs[0]);
+
+		//If |0>, 9/10 are 00, 1/10 are 01, so ArcCos(sqrt(9) / sqrt(10))
+		let theta1 = 2.0 * ArcCos(3.0/Sqrt(10.0));
+		(ControlledOnInt(0, Ry))([qs[0]], (theta1, qs[1]));
+
+		//If |1>, 1/2 are 10, 1/2 are 11, so evenly distribute (PI / 4 from trig unit circle)
+		let theta2 = 2.0 * (PI() / 4.0);
+		(ControlledOnInt(1, H))([qs[0]], qs[1]);
     }
 
 
@@ -204,7 +241,18 @@ namespace Quantum.Kata.Superposition {
         EqualityFactI(Length(bits), Length(qs), "Arrays should have the same length");
         EqualityFactB(bits[0], true, "First bit of the input bit string should be set to true");
 
-        // ...
+		//First bit of the string is true, so we always want it to be 50/50
+		H(qs[0]);
+
+		for (i in 1..Length(qs)-1)
+		{
+			//skip bits that are false
+			if (bits[i])
+			{
+				//If we care about a bit, make it 50/50
+				CNOT(qs[0], qs[i]);
+			}
+		}
     }
 
 
@@ -220,7 +268,48 @@ namespace Quantum.Kata.Superposition {
     // You are guaranteed that the both bit strings have the same length as the qubit array,
     // and that the bit strings will differ in at least one bit.
     operation TwoBitstringSuperposition (qs : Qubit[], bits1 : Bool[], bits2 : Bool[]) : Unit {
-        // ...
+		mutable firstDiff = -1;
+		mutable firstDiffValue = false;
+
+		//Find the first index that is different
+		for (i in 0..Length(qs)-1)
+		{
+			if (bits1[i] != bits2[i] and firstDiff == -1)
+			{
+				set firstDiff = i;
+				set firstDiffValue = bits1[i];
+			}
+		}
+
+		//We know the firstDiff is 50/50, so set that
+		H(qs[firstDiff]);
+
+		for (i in 0..Length(qs)-1)
+		{
+			//If the values are the same, flip 1s to |1>
+			if (bits1[i] == bits2[i])
+			{
+				if (bits1[i])
+				{
+					X(qs[i]);
+				}
+			}
+			else
+			{
+				//Don't touch qs[firstDiff] as we are already happy with it
+				if (i != firstDiff)
+				{
+					//If values are different, put them in a superposition
+					CNOT(qs[firstDiff], qs[i]);
+
+					//Keep the values in sync (0s with 0s, 1s with 1s)
+					if (bits1[i] != firstDiffValue)
+					{
+						X(qs[i]);
+					}
+				}
+			}
+		}
     }
 
 

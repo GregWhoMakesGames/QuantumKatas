@@ -181,8 +181,6 @@ namespace Quantum.Kata.BasicGates {
         CNOT(qs[0], qs[1]);
 		CNOT(qs[1], qs[0]);
 		CNOT(qs[0], qs[1]);
-
-		
     }
 
 
