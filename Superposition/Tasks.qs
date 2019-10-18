@@ -326,8 +326,36 @@ namespace Quantum.Kata.Superposition {
     // Example: for N = 3 and bits = [[false, true, false], [true, false, false], [false, false, true], [true, true, false]]
     //          the state you need to prepare is (|010⟩ + |100⟩ + |001⟩ + |110⟩) / 2.
     operation FourBitstringSuperposition (qs : Qubit[], bits : Bool[][]) : Unit {
-        // Hint: remember that you can allocate extra qubits.
+        
+		let N = Length(qs);
 
+		using (anc = Qubit[2])
+		{
+			//Creates |00> + |01> | 10> + |11> state on anc
+			H(anc[0]);
+			H(anc[1]);
+
+			//Tie anc = |00> to |010> on qs, |01> to |100>, etc. (for the example values)
+			for (i in 0..3)
+			{
+				for (j in 0..N-1)
+				{
+					if (bits[i][j])
+					{
+						(ControlledOnInt(i, X))(anc,qs[j]);
+					}
+				}
+			}
+
+			//Reset anc back to |00>, by removing |01>, |10> and |11>
+			//Note that we don't need to control on |00>, since it's already what we want
+            (ControlledOnBitString(bits[1], X))(qs, anc[0]);
+
+			(ControlledOnBitString(bits[2], X))(qs, anc[1]);
+
+			(ControlledOnBitString(bits[3], X))(qs, anc[0]);
+			(ControlledOnBitString(bits[3], X))(qs, anc[1]);
+		}
         // ...
     }
 
