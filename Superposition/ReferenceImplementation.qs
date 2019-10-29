@@ -364,7 +364,7 @@ namespace Quantum.Kata.Superposition {
                     Controlled SWAP([anc], (qs[i], qs[i + K]));
                 }
                 for (i in K .. N - 1) {
-                    CNOT(qs[i], anc);
+                    CNOT(qs[i], anc);                                                                                                                                                              
                 }
             }
         }
@@ -379,7 +379,7 @@ namespace Quantum.Kata.Superposition {
     // Example: for N = 3, W state is (|100⟩ + |010⟩ + |001⟩) / sqrt(3).
 
     // general solution based on rotations and recursive application of controlled generation routine
-    operation WState_Arbitrary_Reference (qs : Qubit[]) : Unit is Adj + Ctl {
+    operation WState_Arbitrary_Recursive_Reference (qs : Qubit[]) : Unit is Adj + Ctl {
 
         let N = Length(qs);
 
@@ -395,7 +395,7 @@ namespace Quantum.Kata.Superposition {
 
             // do a zero-controlled W-state generation for qubits 1..N-1
             X(qs[0]);
-            Controlled WState_Arbitrary_Reference(qs[0 .. 0], qs[1 .. N - 1]);
+            Controlled WState_Arbitrary_Recursive_Reference(qs[0 .. 0], qs[1 .. N - 1]);
             X(qs[0]);
         }
     }
@@ -403,7 +403,7 @@ namespace Quantum.Kata.Superposition {
 
     // Iterative solution (equivalent to the WState_Arbitrary_Reference, but with the recursion unrolled)
     // Circuit for N=4: https://algassert.com/quirk#circuit={%22cols%22:[[1,1,1,%22~95cq%22],[1,1,%22~erlf%22,%22%E2%97%A6%22],[1,%22~809j%22,%22%E2%97%A6%22,%22%E2%97%A6%22],[%22X%22,%22%E2%97%A6%22,%22%E2%97%A6%22,%22%E2%97%A6%22]],%22gates%22:[{%22id%22:%22~809j%22,%22name%22:%22FS_2%22,%22matrix%22:%22{{%E2%88%9A%C2%BD,-%E2%88%9A%C2%BD},{%E2%88%9A%C2%BD,%E2%88%9A%C2%BD}}%22},{%22id%22:%22~erlf%22,%22name%22:%22FS_3%22,%22matrix%22:%22{{%E2%88%9A%E2%85%94,-%E2%88%9A%E2%85%93},{%E2%88%9A%E2%85%93,%E2%88%9A%E2%85%94}}%22},{%22id%22:%22~95cq%22,%22name%22:%22FS_4%22,%22matrix%22:%22{{%E2%88%9A%C2%BE,-%C2%BD},{%C2%BD,%E2%88%9A%C2%BE}}%22}]}
-    operation WState_Arbitrary_Iterative (qs : Qubit[]) : Unit is Adj {
+    operation WState_Arbitrary_Iterative_Reference (qs : Qubit[]) : Unit is Adj {
         let N = Length(qs);
         FractionSuperposition(N, qs[0]);
         for (i in 1 .. N - 1) {
@@ -428,7 +428,7 @@ namespace Quantum.Kata.Superposition {
 
 
     // solution based on generation for 2ᵏ and post-selection using measurements
-    operation WState_Arbitrary_Postselect (qs : Qubit[]) : Unit {
+    operation WState_Arbitrary_Postselect_Reference (qs : Qubit[]) : Unit {
         let N = Length(qs);
 
         if (N == 1) {

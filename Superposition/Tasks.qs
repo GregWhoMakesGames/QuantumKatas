@@ -367,17 +367,93 @@ namespace Quantum.Kata.Superposition {
     // Example: for N = 4, W state is (|1000⟩ + |0100⟩ + |0010⟩ + |0001⟩) / 2.
     operation WState_PowerOfTwo (qs : Qubit[]) : Unit {
         // Hint: you can use Controlled modifier to perform arbitrary controlled gates.
+		
+		let N = Length(qs);
+		
+		if (N == 1)
+		{
+			//Default case: |1> is the W state on N = 1
+			X(qs[0]);
+		}
+		else
+		{
+			let K = N / 2;
+			WState_PowerOfTwo(qs[0..K-1]);
 
-        // ...
+			using (anc = Qubit())
+			{
+				H(anc);
+
+				for (i in 0..K-1)
+				{
+					//For N = 8
+					//K = 4
+					//SWAP(0, 4), SWAP(1,5), SWAP(2,6), SWAP(3,7)
+					Controlled SWAP([anc], (qs[i], qs[i+K]));
+				}
+				for (i in K..N-1)
+				{
+					//Reset anc to |0>
+					CNOT(qs[i], anc);
+				}
+			}
+		}
     }
 
 
     // Task 17**. W state on arbitrary number of qubits
+	// Recursive approach
     // Input: N qubits in |0...0⟩ state (N is not necessarily a power of 2).
     // Goal: create a W state (https://en.wikipedia.org/wiki/W_state) on these qubits.
     // W state is an equal superposition of all basis states on N qubits of Hamming weight 1.
     // Example: for N = 3, W state is (|100⟩ + |010⟩ + |001⟩) / sqrt(3).
-    operation WState_Arbitrary (qs : Qubit[]) : Unit {
-        // ...
+    operation WState_Arbitrary_Recursive (qs : Qubit[]) : Unit is Adj + Ctl {
+        let N = Length(qs);
+
+		if (N == 1)
+		{
+			//Set the value of qs[0] to |1>
+			X(qs[0]);
+		}
+		else
+		{
+			//For N = 4, we want [0: 1/4, 1: 3/4 * 1/3, 2: 3/4 * (2/3 * 1/2) , 3: 3/4 * (2/3 * 1/2)]
+			//We do 1/4 qs[0], 3/4 the rest, then 1/3 qs[1], 2/3 the rest, etc.
+
+			//for N = 4, angle = 1/sqrt(4)
+			let angle = ArcSin(1.0 / Sqrt(IntAsDouble(N)));
+			Ry(2.0 * angle, qs[0]);
+
+			//Flip qs[0] to be the opposite, so from 1/4 to 3/4, or 1/8 to 7/8
+			X(qs[0]);
+
+			//If qs[0] == |1>, the rest are 0.
+			//Else, run the algorithm on the rest of the set, so if qs[0] == |0> and qs[1] == |1>, the rest are 0, etc.
+			Controlled WState_Arbitrary_Recursive(qs[0..0], qs[1..N-1]);
+
+			//Flip qs back to its original weight
+			X(qs[0]);
+		}
     }
+
+	// Task 17**. W state on arbitrary number of qubits
+	// Iterative approach
+    // Input: N qubits in |0...0⟩ state (N is not necessarily a power of 2).
+    // Goal: create a W state (https://en.wikipedia.org/wiki/W_state) on these qubits.
+    // W state is an equal superposition of all basis states on N qubits of Hamming weight 1.
+    // Example: for N = 3, W state is (|100⟩ + |010⟩ + |001⟩) / sqrt(3).
+    operation WState_Arbitrary_Iterative (qs : Qubit[]) : Unit is Adj {
+        let N = Length(qs);
+
+	}
+
+	// Task 17**. W state on arbitrary number of qubits
+	// Power of Two approach
+    // Input: N qubits in |0...0⟩ state (N is not necessarily a power of 2).
+    // Goal: create a W state (https://en.wikipedia.org/wiki/W_state) on these qubits.
+    // W state is an equal superposition of all basis states on N qubits of Hamming weight 1.
+    // Example: for N = 3, W state is (|100⟩ + |010⟩ + |001⟩) / sqrt(3).
+	operation WState_Arbitrary_Postselect (qs : Qubit[]) : Unit {
+
+	}
 }

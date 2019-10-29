@@ -195,7 +195,7 @@ namespace Quantum.Kata.Superposition {
         mutable bits = [[false, false], [false, true], [true, false], [true, true]];
         AssertEqualOnZeroState(2, FourBitstringSuperposition(_, bits), ApplyToEachA(H, _));
         set bits = [[false, false, false, true], [false, false, true, false], [false, true, false, false], [true, false, false, false]];
-        AssertEqualOnZeroState(4, FourBitstringSuperposition(_, bits), WState_Arbitrary_Reference);
+        AssertEqualOnZeroState(4, FourBitstringSuperposition(_, bits), WState_Arbitrary_Recursive_Reference);
 
         // random tests
         for (N in 3 .. 10) {
@@ -243,23 +243,65 @@ namespace Quantum.Kata.Superposition {
 
 
     // ------------------------------------------------------
-    operation T17_WState_Arbitrary_Test () : Unit {
+    operation T17_WState_Arbitrary_Recursive_Test () : Unit {
         // separate check for N = 1 (return must be |1⟩)
         using (qs = Qubit[1]) {
-            WState_Arbitrary_Reference(qs);
+            WState_Arbitrary_Recursive_Reference(qs);
             Assert([PauliZ], qs, One, "");
             X(qs[0]);
         }
 
         // cross-tests
-        AssertEqualOnZeroState(2, WState_Arbitrary, TwoBitstringSuperposition_Reference(_, [false, true], [true, false]));
-        AssertEqualOnZeroState(2, WState_Arbitrary, WState_PowerOfTwo_Reference);
-        AssertEqualOnZeroState(4, WState_Arbitrary, WState_PowerOfTwo_Reference);
-        AssertEqualOnZeroState(8, WState_Arbitrary, WState_PowerOfTwo_Reference);
-        AssertEqualOnZeroState(16, WState_Arbitrary, WState_PowerOfTwo_Reference);
+        AssertEqualOnZeroState(2, WState_Arbitrary_Recursive, TwoBitstringSuperposition_Reference(_, [false, true], [true, false]));
+        AssertEqualOnZeroState(2, WState_Arbitrary_Recursive, WState_PowerOfTwo_Reference);
+        AssertEqualOnZeroState(4, WState_Arbitrary_Recursive, WState_PowerOfTwo_Reference);
+        AssertEqualOnZeroState(8, WState_Arbitrary_Recursive, WState_PowerOfTwo_Reference);
+        AssertEqualOnZeroState(16, WState_Arbitrary_Recursive, WState_PowerOfTwo_Reference);
 
         for (i in 2 .. 16) {
-            AssertEqualOnZeroState(i, WState_Arbitrary, WState_Arbitrary_Reference);
+            AssertEqualOnZeroState(i, WState_Arbitrary_Recursive, WState_Arbitrary_Recursive_Reference);
         }
+    }
+
+	// ------------------------------------------------------
+    operation T17_WState_Arbitrary_Iterative_Test () : Unit {
+        // separate check for N = 1 (return must be |1⟩)
+        using (qs = Qubit[1]) {
+            WState_Arbitrary_Iterative_Reference(qs);
+            Assert([PauliZ], qs, One, "");
+            X(qs[0]);
+        }
+
+        // cross-tests
+        AssertEqualOnZeroState(2, WState_Arbitrary_Iterative, TwoBitstringSuperposition_Reference(_, [false, true], [true, false]));
+        AssertEqualOnZeroState(2, WState_Arbitrary_Iterative, WState_PowerOfTwo_Reference);
+        AssertEqualOnZeroState(4, WState_Arbitrary_Iterative, WState_PowerOfTwo_Reference);
+        AssertEqualOnZeroState(8, WState_Arbitrary_Iterative, WState_PowerOfTwo_Reference);
+        AssertEqualOnZeroState(16, WState_Arbitrary_Iterative, WState_PowerOfTwo_Reference);
+
+        for (i in 2 .. 16) {
+            AssertEqualOnZeroState(i, WState_Arbitrary_Iterative, WState_Arbitrary_Iterative_Reference);
+        }
+    }
+
+	// ------------------------------------------------------
+    operation T17_WState_Arbitrary_Postselect_Test () : Unit {
+        // separate check for N = 1 (return must be |1⟩)
+        using (qs = Qubit[1]) {
+            WState_Arbitrary_Postselect_Reference(qs);
+            Assert([PauliZ], qs, One, "");
+            X(qs[0]);
+        }
+
+        // cross-tests
+        AssertEqualOnZeroState(2, WState_Arbitrary_Postselect, TwoBitstringSuperposition_Reference(_, [false, true], [true, false]));
+        AssertEqualOnZeroState(2, WState_Arbitrary_Postselect, WState_PowerOfTwo_Reference);
+        AssertEqualOnZeroState(4, WState_Arbitrary_Postselect, WState_PowerOfTwo_Reference);
+        AssertEqualOnZeroState(8, WState_Arbitrary_Postselect, WState_PowerOfTwo_Reference);
+        AssertEqualOnZeroState(16, WState_Arbitrary_Postselect, WState_PowerOfTwo_Reference);
+
+        //for (i in 2 .. 16) {
+        //    AssertEqualOnZeroState(i, WState_Arbitrary_Postselect, WState_Arbitrary_Postselect_Reference);
+        //}
     }
 }
